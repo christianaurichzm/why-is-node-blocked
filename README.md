@@ -4,23 +4,7 @@
 
 Find the line of JavaScript that is blocking your Node.js event loop.
 
-```console
-$ npx why-is-node-blocked example.mjs
-why-is-node-blocked: event loop blocked for over 1000ms
-    at resizeImage (example.mjs:7:3)
-    at <anonymous> (example.mjs:19:1)
-why-is-node-blocked: event loop resumed after 2006ms
-why-is-node-blocked: event loop blocked for over 1000ms
-    at isValidEmail (example.mjs:11:21)
-    at <anonymous> (example.mjs:21:1)
-why-is-node-blocked: event loop resumed after 4140ms
-why-is-node-blocked: event loop blocked for over 1000ms
-    at getStderr (node:internal/bootstrap/switches/is_main_thread:174:3)
-    at execSync (node:child_process:986:13)
-    at gitRevision (example.mjs:15:10)
-    at <anonymous> (example.mjs:23:1)
-why-is-node-blocked: event loop resumed after 2119ms
-```
+![Running example.mjs: three stalls reported with the stacks of resizeImage, isValidEmail and gitRevision](https://raw.githubusercontent.com/christianaurichzm/why-is-node-blocked/main/.github/demo.gif)
 
 Busy loops, catastrophic regular expressions, synchronous `fs` and
 `child_process` calls: when the main thread stops turning the event loop, you
@@ -33,6 +17,32 @@ Run a script with it:
 
 ```sh
 npx why-is-node-blocked server.js
+```
+
+Each stall is reported as soon as it passes the threshold, with the stack the
+main thread is stuck in, and once more when the loop resumes. For
+[`example.mjs`](example.mjs):
+
+```console
+$ npx why-is-node-blocked example.mjs
+why-is-node-blocked: event loop blocked for over 1000ms
+    at resizeImage (file:///tmp/app/example.mjs:7:3)
+    at <anonymous> (file:///tmp/app/example.mjs:19:1)
+why-is-node-blocked: event loop resumed after 2032ms
+why-is-node-blocked: event loop blocked for over 1000ms
+    at isValidEmail (file:///tmp/app/example.mjs:11:21)
+    at <anonymous> (file:///tmp/app/example.mjs:21:1)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at processTimers (node:internal/timers:518:9)
+why-is-node-blocked: event loop resumed after 1628ms
+why-is-node-blocked: event loop blocked for over 1000ms
+    at getStderr (node:internal/bootstrap/switches/is_main_thread:174:3)
+    at execSync (node:child_process:986:13)
+    at gitRevision (file:///tmp/app/example.mjs:15:10)
+    at <anonymous> (file:///tmp/app/example.mjs:23:1)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at processTimers (node:internal/timers:518:9)
+why-is-node-blocked: event loop resumed after 2058ms
 ```
 
 Or install it and load it before your app:
