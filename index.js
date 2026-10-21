@@ -21,7 +21,12 @@ export function watch({ thresholdMs = 1000, onBlock } = {}) {
   if (!isMainThread || started) return;
   started = true;
 
-  const beat = new Int32Array(new SharedArrayBuffer(4));
+  // When the loop last turned, on a clock that is monotonic and shared by all
+  // threads: a watcher thread that starts after the main thread has already
+  // stalled dates the stall from it.
+  const beat = new BigInt64Array(new SharedArrayBuffer(8));
+  const turn = () => Atomics.store(beat, 0, process.hrtime.bigint());
+  turn();
   // Under the permission model without --allow-inspector, connecting to the
   // main thread throws, and on Node.js 22 it aborts the whole process.
   const inspect = !process.permission || process.permission.has('inspector');
@@ -45,5 +50,5 @@ export function watch({ thresholdMs = 1000, onBlock } = {}) {
   // again.
   worker.unref();
 
-  setInterval(() => Atomics.add(beat, 0, 1), Math.min(50, thresholdMs / 4)).unref();
+  setInterval(turn, Math.min(50, thresholdMs / 4)).unref();
 }

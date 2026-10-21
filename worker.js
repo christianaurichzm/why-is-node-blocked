@@ -84,16 +84,16 @@ function describe(result) {
   return result.map(({ functionName, url, line, column }) => `    at ${functionName} (${url}:${line}:${column})\n`).join('');
 }
 
+const elapsedMs = (from, to) => Number(to - from) / 1e6;
+
 let last = Atomics.load(beat, 0);
-let lastChange = performance.now();
 let pending = null;
 
 setInterval(() => {
-  const now = performance.now();
   const current = Atomics.load(beat, 0);
   if (current !== last) {
     if (pending) {
-      const durationMs = Math.round(now - lastChange);
+      const durationMs = Math.round(elapsedMs(last, current));
       pending.then((result) => {
         if (report) write(`why-is-node-blocked: event loop resumed after ${durationMs}ms\n`);
         else if (typeof result === 'string') parentPort.postMessage({ durationMs, stack: null, reason: result });
@@ -102,8 +102,7 @@ setInterval(() => {
       pending = null;
     }
     last = current;
-    lastChange = now;
-  } else if (!pending && now - lastChange >= thresholdMs) {
+  } else if (!pending && elapsedMs(last, process.hrtime.bigint()) >= thresholdMs) {
     // Printed now rather than with the stack: a thread stuck in native code
     // runs no JavaScript, so the pause may never come.
     if (report) write(`why-is-node-blocked: event loop blocked for over ${thresholdMs}ms\n`);

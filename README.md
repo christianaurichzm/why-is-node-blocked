@@ -65,9 +65,9 @@ Requires Node.js 22.15 or later.
 
 ## How it works
 
-The main thread bumps a counter in a `SharedArrayBuffer` every 50ms. A worker
-thread watches the counter. When it stops moving for longer than the
-threshold, the worker opens an inspector session to the main thread
+Every 50ms the main thread writes the time (`process.hrtime.bigint()`, a
+monotonic clock) into a `SharedArrayBuffer`. A worker thread reads it, and
+when it falls behind by more than the threshold, the worker opens an inspector session to the main thread
 (`Session.connectToMainThread()`), pauses it for an instant with
 `Debugger.pause`, reads the call frames and resumes it.
 
@@ -85,7 +85,7 @@ blames the loop's caller.
 
 ## Cost
 
-While the loop is healthy: one timer and one atomic increment every 50ms on
+While the loop is healthy: one timer and one atomic store every 50ms on
 the main thread, with no measurable change in throughput in our benchmark.
 
 When a stall is caught, the capture holds the main thread a little longer:
