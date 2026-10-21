@@ -1,1 +1,1 @@
-setTimeout(() => {}, 300);
+setTimeout(() => {}, 1500);

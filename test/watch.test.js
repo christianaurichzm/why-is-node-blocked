@@ -16,7 +16,14 @@ test('reports the blocking function and how long the loop was blocked', () => {
 });
 
 test('stays quiet and lets the process exit when nothing blocks', () => {
-  const { status, signal, stderr } = node('--import', './register.js', 'test/fixtures/idle.mjs');
+  // The default threshold: a slow CI disk can hold the main thread for a few
+  // hundred milliseconds while it loads the entry point, a real stall that a
+  // 200ms threshold reports.
+  const { status, signal, stderr } = spawnSync(process.execPath, ['--import', './register.js', 'test/fixtures/idle.mjs'], {
+    encoding: 'utf8',
+    env: { ...env, WHY_IS_NODE_BLOCKED_MS: '' },
+    timeout: 20_000,
+  });
   assert.equal(signal, null);
   assert.equal(status, 0);
   assert.equal(stderr, '');
