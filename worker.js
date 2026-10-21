@@ -114,3 +114,5 @@ setInterval(() => {
     if (report) pending.then((result) => write(describe(result)));
   }
 }, tickMs);
+
+parentPort.postMessage('ready');

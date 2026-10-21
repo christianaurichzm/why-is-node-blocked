@@ -31,6 +31,26 @@ test('delivers the event to onBlock instead of stderr', () => {
   assert.equal(event.stack[0].functionName, 'blockingFunction');
 });
 
+test('a second watch() call waits for the same watcher', () => {
+  const { status, stdout, stderr } = node('test/fixtures/twice.mjs');
+  assert.equal(status, 0, stderr);
+  assert.equal(stdout, 'true\n');
+});
+
+for (const via of ['channel', 'hook']) {
+  test(`a watch() call from instrumentation during startup keeps the first call's options (${via})`, () => {
+    const { status, stdout, stderr } = node('test/fixtures/reentrant.mjs', via);
+    assert.equal(status, 0, stderr);
+    assert.equal(stdout, '1 worker, same promise: true\nonBlock\n');
+  });
+}
+
+test('warns and lets the app run when the watcher cannot start', () => {
+  const { status, stderr } = node('--enable-sharedarraybuffer-per-context', '--import', './register.js', 'test/fixtures/idle.mjs');
+  assert.equal(status, 0, stderr);
+  assert.match(stderr, /why-is-node-blocked is disabled: SharedArrayBuffer is not defined/);
+});
+
 test('leaves a pause held by another debugger client alone', () => {
   const { status, stdout, stderr } = node('--import', './register.js', 'test/fixtures/debugger.mjs');
   assert.equal(status, 0, stderr);

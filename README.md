@@ -42,13 +42,17 @@ NODE_OPTIONS="--import why-is-node-blocked/register" npm start
 ```
 
 The threshold defaults to 1000ms; set `WHY_IS_NODE_BLOCKED_MS` to change it.
+Your app starts once the watcher thread is running, which adds a few tens of
+milliseconds to startup (about 45ms on Linux x64). The wait is best effort: the
+app goes ahead without a watcher that fails to start, and stops waiting for a
+slow one when a 2-second timer fires.
 
 To send reports to your logger instead of stderr:
 
 ```js
 import { watch } from 'why-is-node-blocked';
 
-watch({
+await watch({
   thresholdMs: 500,
   onBlock({ durationMs, stack, reason }) {
     logger.warn({ durationMs, stack, reason }, 'event loop blocked');
@@ -56,10 +60,14 @@ watch({
 });
 ```
 
-`onBlock` runs on the main thread once the loop turns again. `stack` is an
-array of `{ functionName, url, line, column }`, or `null` with a `reason` when
-no stack could be taken. The stderr reporter writes from another thread as
-soon as the stall is detected, so it also reports a loop that never recovers.
+`watch()` resolves once the watcher thread is running, when it fails or exits
+before that, or when a 2-second timer fires; it never rejects, and errors are
+emitted as process warnings. A stall that ends before the watcher runs goes
+unseen. Calling it again returns the same promise. `onBlock` runs on the main
+thread once the loop turns again. `stack` is an array of
+`{ functionName, url, line, column }`, or `null` with a `reason` when no stack
+could be taken. The stderr reporter writes from another thread as soon as the
+stall is detected, so it also reports a loop that never recovers.
 
 Requires Node.js 22.15 or later.
 
