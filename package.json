@@ -1,0 +1,38 @@
+{
+  "name": "why-is-node-blocked",
+  "version": "0.1.0",
+  "description": "Shows the JavaScript stack that is blocking the Node.js event loop",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./register": "./register.js"
+  },
+  "bin": {
+    "why-is-node-blocked": "./cli.js"
+  },
+  "files": [
+    "index.js",
+    "register.js",
+    "worker.js",
+    "cli.js"
+  ],
+  "engines": {
+    "node": ">=22.15"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "event loop",
+    "blocked",
+    "stall",
+    "diagnostics",
+    "inspector",
+    "profiler",
+    "stack trace",
+    "performance"
+  ],
+  "repository": "github:christianaurichzm/why-is-node-blocked",
+  "author": "Christian Aurich Zanettini Martins",
+  "license": "MIT"
+}
