@@ -8,7 +8,7 @@
     "./register": "./register.js"
   },
   "bin": {
-    "why-is-node-blocked": "./cli.js"
+    "why-is-node-blocked": "cli.js"
   },
   "files": [
     "index.js",
@@ -32,7 +32,10 @@
     "stack trace",
     "performance"
   ],
-  "repository": "github:christianaurichzm/why-is-node-blocked",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/christianaurichzm/why-is-node-blocked.git"
+  },
   "author": "Christian Aurich Zanettini Martins",
   "license": "MIT"
 }
