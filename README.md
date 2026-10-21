@@ -1,5 +1,7 @@
 # why-is-node-blocked
 
+[![npm](https://img.shields.io/npm/v/why-is-node-blocked)](https://www.npmjs.com/package/why-is-node-blocked)
+
 Find the line of JavaScript that is blocking your Node.js event loop.
 
 ```console
